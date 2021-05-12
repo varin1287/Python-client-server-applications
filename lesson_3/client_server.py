@@ -2,8 +2,9 @@ from socket import *
 import pickle
 import sys
 
-ip_adress = 'localhost'
-port = 7777
+
+IP_ADRESS = 'localhost'
+PORT = 7777
 
 msg = {
     "action": "presence",
@@ -16,17 +17,22 @@ msg = {
     }
 }
 
-if __name__ == "__main__":
-    if len(sys.argv) == 2:
-        ip_adress = sys.argv[1]
-    elif len(sys.argv) == 3:
-        ip_adress = sys.argv[1]
-        port = sys.argv[2]
 
+def get_params(ip_adress=IP_ADRESS, port=PORT):
+    if __name__ == "__main__":
+        if len(sys.argv) == 2:
+            ip_adress = sys.argv[1]
+        elif len(sys.argv) == 3:
+            ip_adress = sys.argv[1]
+            port = sys.argv[2]
+    return {'ip_adress': ip_adress, 'port': port}
+
+
+start_params = get_params()
 
 s = socket(AF_INET, SOCK_STREAM)
 try:
-    s.connect((ip_adress, int(port)))
+    s.connect((start_params['ip_adress'], int(start_params['port'])))
 except ValueError:
     print('Неверные параметры командной строки проверьте правильность ввода')
     print('Вначале вводите ip-адрес затем tcp-порт')

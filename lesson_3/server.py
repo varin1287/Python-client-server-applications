@@ -6,11 +6,13 @@ import argparse
 PORT_DEFAULT = 7777
 IP_ADRESS_DEFAULT = ''
 
+
 def create_port():
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', default=PORT_DEFAULT)
     parser.add_argument('-a', default=IP_ADRESS_DEFAULT)
     return parser
+
 
 if __name__ == '__main__':
     parser = create_port()
