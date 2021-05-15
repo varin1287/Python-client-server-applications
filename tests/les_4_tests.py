@@ -1,4 +1,4 @@
-from lesson_3.client_server import get_params
+from client_server import get_params
 import unittest
 
 
@@ -11,9 +11,6 @@ class TestParamsClient(unittest.TestCase):
 
     def test_get_params_with_param_false(self):
         self.assertEqual(get_params('127.0.0.1', 2222), ({'ip_adress': 'localhost', 'port': 7777}))
-
-
-
 
 
 if __name__ == "__main__":
