@@ -1,6 +1,7 @@
 from socket import *
 import pickle
 import sys
+import log.client_log_config as client_log
 
 IP_ADRESS = 'localhost'
 PORT = 7777
@@ -27,17 +28,25 @@ def get_params(ip_adress=IP_ADRESS, port=PORT):
     return {'ip_adress': ip_adress, 'port': port}
 
 
+log = client_log.get_loger()
+
+
 def main():
     start_params = get_params()
     s = socket(AF_INET, SOCK_STREAM)
     try:
         s.connect((start_params['ip_adress'], int(start_params['port'])))
-    except ValueError:
-        print('Неверные параметры командной строки проверьте правильность ввода')
-        print('Вначале вводите ip-адрес затем tcp-порт')
-        print('операция прерванна')
-    except ConnectionRefusedError:
-        print('Отказано в подключении, проверьте парраметры подключения')
+    except ValueError as e:
+        log.warning(f'описание ошибки: {e}')
+        log.info('операция прерванна')
+        log.info('Неверные параметры командной строки проверьте правильность ввода')
+        log.info('Вначале вводите ip-адрес затем tcp-порт')
+
+    except ConnectionRefusedError as e:
+        log.warning(f'описание ошибки: {e}')
+        log.info('Отказано в подключении, проверьте парраметры подключения')
+    except Exception as e:
+        log.warning(f'неучтенная ошибка: {e}')
     else:
         s.send(pickle.dumps(msg))
         data = s.recv(1024)
@@ -45,6 +54,6 @@ def main():
 
     s.close()
 
+
 if __name__ == '__main__':
     main()
-
