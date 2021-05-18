@@ -2,36 +2,22 @@ from socket import *
 import pickle
 import sys
 import log.client_log_config as client_log
+from datetime import datetime
 
 IP_ADRESS = 'localhost'
 PORT = 7777
 
-msg = {
-    "action": "presence",
-    "time": "<unix timestamp>",
-    "type": "status",
-    "user": {
-        "account_name": "my_name",
-        "status":
-            "Yes, I am here!"
-    }
-}
-
 
 def get_params(ip_adress=IP_ADRESS, port=PORT):
-    if __name__ == "__main__":
-        if len(sys.argv) == 2:
-            ip_adress = sys.argv[1]
-        elif len(sys.argv) == 3:
-            ip_adress = sys.argv[1]
-            port = sys.argv[2]
+    if len(sys.argv) == 2:
+        ip_adress = sys.argv[1]
+    elif len(sys.argv) == 3:
+        ip_adress = sys.argv[1]
+        port = sys.argv[2]
     return {'ip_adress': ip_adress, 'port': port}
 
 
-log = client_log.get_loger()
-
-
-def main():
+def main(msg):
     start_params = get_params()
     s = socket(AF_INET, SOCK_STREAM)
     try:
@@ -56,4 +42,69 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    log = client_log.get_loger()
+
+
+    msg_list = []
+
+    msg_list.append({
+        "action": "presence",
+        "time": datetime.now(),
+        "type": "status",
+        "user": {"account_name": "my_name", "status": "Yes, I am here!"}
+    })
+
+    msg_list.append({
+        "action": "create",
+        "time": datetime.now(),
+        "type": "status",
+        "user": {"account_name": "my_name", "status": "Yep, I am here!"},
+    })
+
+    msg_list.append({
+        "action": "quit",
+        "time": datetime.now(),
+        "type": "status",
+        "user": {"account_name": "my_name", "status": "Yep, I am here!"},
+    })
+
+    msg_list.append({
+        "action": "server_not_this_command",
+        "time": datetime.now(),
+
+    })
+
+    # Длинна текста больше допустимой
+    import random
+    import string
+
+    def generate_random_string(length):
+        letters = string.ascii_lowercase
+        rand_string = ''.join(random.choice(letters) for i in range(length))
+        return rand_string
+
+    long_str = generate_random_string(700)
+
+    msg_list.append({
+        "action": "presence",
+        "time": datetime.now(),
+        "type": "status",
+        "user": {"account_name": "my_name", "status": f"very long text Yep, I am here! {long_str} "},
+    })
+
+    print('пользователь отсутствует "action": "presence" ')
+    main(msg_list[0])
+    print('пользователь отсутствует "action": "create" ')
+    main(msg_list[1])
+    print('пользователь зарегестрированн "action": "presence" ')
+    main(msg_list[0])
+    print('пользователь зарегестрированн "action": "create" ')
+    main(msg_list[1])
+    print('пользователь зарегестрированн "action": "quit" ')
+    main(msg_list[2])
+    print('пользователь отсутствует "action": "quit" ')
+    main(msg_list[2])
+    print('неизвестная команда')
+    main(msg_list[3])
+    print('очень длинный текст')
+    main(msg_list[4])
