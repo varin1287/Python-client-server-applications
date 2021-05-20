@@ -1,13 +1,25 @@
 from socket import *
 import pickle
 import sys
-import log.client_log_config as client_log
+import log.log_config as client_log
 from datetime import datetime
+from functools import wraps
+import inspect
 
 IP_ADRESS = 'localhost'
 PORT = 7777
 
 
+def log(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        log.debug(f'Функция {func.__name__} вызвана из функции {inspect.stack()[1][3]}')
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+@log
 def get_params(ip_adress=IP_ADRESS, port=PORT):
     if len(sys.argv) == 2:
         ip_adress = sys.argv[1]
@@ -43,8 +55,16 @@ def main(msg):
 
 if __name__ == '__main__':
     log = client_log.get_loger()
+    msg = {
+        "action": "presence",
+        "time": datetime.now(),
+        "type": "status",
+        "user": {"account_name": "my_name", "status": "Yes, I am here!"}
+    }
 
+    main(msg)
 
+'''
     msg_list = []
 
     msg_list.append({
@@ -108,3 +128,4 @@ if __name__ == '__main__':
     main(msg_list[3])
     print('очень длинный текст')
     main(msg_list[4])
+'''

@@ -2,8 +2,16 @@ from socket import *
 import pickle
 import sys
 import argparse
-import log.server_log_config as server_log
+import log.log_config as server_log
 from datetime import datetime
+from functools import wraps
+import inspect
+
+# TODO в decorator.py запись идет  с уровня info и с уровня debug, как сделать чтобы запись была только с debug?
+
+# TODO При импорте my_log из файла вывод логов повторяется, не могу понять почему. Приходится дублировать
+#  декоратор в двух файлах. Как это исправить?
+from decorator import my_log
 
 PORT_DEFAULT = 7777
 IP_ADRESS_DEFAULT = ''
@@ -11,6 +19,29 @@ IP_ADRESS_DEFAULT = ''
 authorized_users = []
 
 
+def log(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        log.debug(f'Функция {func.__name__} вызвана из функции {inspect.stack()[1][3]}')
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+DEBUG = True
+
+
+def mockable(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        func_name = func.__name__ + '_mock' if DEBUG else func.__name__
+        res = getattr(func_name)
+        return res
+
+    return wrapper
+
+
+@my_log
 def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', default=PORT_DEFAULT)
@@ -18,6 +49,7 @@ def create_parser():
     return parser
 
 
+@log
 def get_socket(ip_adress, port):
     s = socket(AF_INET, SOCK_STREAM)
     try:
@@ -32,6 +64,7 @@ def get_socket(ip_adress, port):
     return s
 
 
+@log
 def checking_data(message):
     if len(message) > 640:
         return {
@@ -53,6 +86,7 @@ def checking_data(message):
     return processing_the_action(**data)
 
 
+@log
 def add_user_in_chat(**kwargs):
     user_name = kwargs["user"]["account_name"]
     if user_name in authorized_users:
@@ -69,6 +103,7 @@ def add_user_in_chat(**kwargs):
     }
 
 
+@log
 def presence(**kwargs):
     user_name = kwargs["user"]["account_name"]
     if user_name in authorized_users:
@@ -80,6 +115,7 @@ def presence(**kwargs):
     return {"response": 404, "time": datetime.now(), "error": f"пользователь {user_name} отсутствует на сервере"}
 
 
+@log
 def log_out_chat(**kwargs):
     user_name = kwargs["user"]["account_name"]
     if user_name in authorized_users:
@@ -115,4 +151,3 @@ def main():
 if __name__ == '__main__':
     log = server_log.get_loger()
     main()
-    # main_test()
